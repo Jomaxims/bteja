@@ -1,0 +1,57 @@
+module = "MODULE" whitespace ident  ';' whitespace? { DeclarationSequence } whitespace? [ "BEGIN" whitespace StatementSequence ] "END" whitespace ident '.' whitespace?
+
+letter = "a"|"b"|"c"|"d"|"e"|"f"|"g"|"h"|"i"|"j"|"k"|"l"|"m"|"n"|"o"|"p"|"q"|"r"|"s"|"t"|"u"|"v"|"w"|"x"|"y"|"z"|"A"|"B"|"C"|"D"|"E"|"F"|"G"|"H"|"I"|"J"|"K"|"L"|"M"|"N"|"O"|"P"|"Q"|"R"|"S"|"T"|"U"|"V"|"W"|"X"|"Y"|"Z";
+symbol = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">" | "'" | '"' | "=" | "|" | "." | "," | ";" | ":" | "-" | "+" | "*" | "?" | "\n" | "\t" | "\r" | "\f" | "\b";
+digit = "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9";
+character = letter | digit | symbol | "_" | " ";
+
+whitespace = (" " | "\n") {" " | "\n"};
+doubleqoute = '"';
+
+integer = digit {digit};
+real = digit {digit} "." {digit};
+string = doubleqoute {character} doubleqoute;
+
+ident  = ( letter | '_' ) { letter | digit | '_' };
+BaseType = ident;
+type = BaseType | ArrayType;
+length = expression;
+LengthList = length { whitespace? ',' whitespace?  length}
+ArrayType = "ARRAY" whitespace [ LengthList whitespace]  "OF" whitespace type;
+
+
+expression = SimpleExpression whitespace? [ relation whitespace? SimpleExpression ];
+SimpleExpression = ['+' | '-'] term whitespace? { AddOperator whitespace? term };
+term = factor whitespace? {MulOperator whitespace? factor};
+AddOperator = '+' | '-';
+relation = '=' | '<' | '<=' | '>' | '>=';
+factor = literal | designator [ActualParameters] | '(' expression ')';
+MulOperator = '*' | '/' | "DIV" | "MOD";
+literal = integer | real | string;
+designator = ident [selector];
+selector = '[' ExpList']';
+ActualParameters = '(' [ExpList] ')';
+ExpList = expression whitespace? {',' whitespace? expression};
+assignment = designator whitespace? ':=' whitespace? expression;
+
+
+VariableDeclaration = IdentList whitespace? ":" whitespace? type;
+IdentList = ident { whitespace? ',' whitespace? ident};
+ConstDeclaration = ident whitespace? '=' whitespace? expression;
+DeclarationSequence = { "CONST" whitespace { ConstDeclaration ';' whitespace? } | "VAR" whitespace { VariableDeclaration ';' whitespace? } | ProcedureDeclaration ';' whitespace? };
+
+statement = [ assignment | ProcedureCall | IfStatement| ExitStatement | ReturnStatement | ForStatement ]
+StatementSequence = statement ";" whitespace? { statement ";" whitespace? }
+ProcedureCall = designator [ActualParameters]
+IfStatement = "IF" whitespace expression whitespace "THEN" whitespace StatementSequence whitespace {ElsifStatement whitespace} [ElseStatement whitespace] "END"
+ElsifStatement = "ELSIF" whitespace expression whitespace "THEN" whitespace StatementSequence
+ElseStatement = "ELSE" whitespace StatementSequence
+ExitStatement = "EXIT"
+ReturnStatement = "RETURN" whitespace [ expression ]
+ForStatement = "FOR" whitespace ident whitespace? ':=' whitespace? expression whitespace "TO" whitespace expression [ whitespace "BY" whitespace  expression ] whitespace "DO" whitespace StatementSequence "END"
+
+ProcedureDeclaration = ProcedureHeading ';' whitespace? ProcedureBody "END" whitespace ident
+ProcedureHeading = ( "PROCEDURE" | "PROC" ) whitespace? ident [ FormalParameters ]
+FormalParameters = '(' [ FPSection { [';'] whitespace? FPSection whitespace? } ] ')' whitespace? [ ':' whitespace? type ]
+FPSection = ident whitespace? { [','] whitespace? ident whitespace? } ':' whitespace? type
+ProcedureBody = DeclarationSequence [ "BEGIN" whitespace? StatementSequence | ReturnStatement ';' ]

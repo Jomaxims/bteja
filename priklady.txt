@@ -1,0 +1,79 @@
+MODULE e1;
+
+CONST
+    matrixSize = 10;
+
+VAR
+    mat: MATRIX matrixSize, matrixSize OF REAL;
+
+PROCEDURE printRealMatrix(m : MATRIX OF REAL);
+BEGIN
+    FOR i := 0 TO LEN(a) - 1 DO
+        FOR j := 0 TO LEN(a[i]) - 1 DO
+            PRINT_REAL(a[i, j]);
+            PRINT_STR(" ");
+        END;
+        PRINTLN();
+    END;
+END printRealMatrix;
+
+BEGIN
+    FOR i := 0 TO LEN(mat) - 1 DO
+        FOR j := 0 TO LEN(mat[i]) - 1 DO
+            a[i, j] := i + j;
+        END;
+    END;
+
+    printRealMatrix(mat);
+END e1.
+
+
+
+
+
+
+MODULE e2;
+
+CONST
+    a = 10;
+
+VAR
+    b: INTEGER;
+    res: STRING;
+
+BEGIN
+    b := 8;
+
+    IF a > b THEN
+        res := "a > b";
+    ELSIF a < b THEN
+        res := "a < b";
+    ELSE
+        res := "a = b";
+    END;
+
+    PRINT_STR(res);
+END e2.
+
+
+
+
+
+MODULE e3;
+
+CONST
+    factorial = 10;
+
+PROCEDURE recFact(f: INTEGER): INTEGER;
+BEGIN
+    IF f <= 1 THEN
+        RETURN 1;
+    ELSE
+        RETURN f * recFact(f - 1);
+    END;
+END recFact;
+
+BEGIN
+    PRINT_STR("Factorial: ");
+    PRINT_INT(recFact(factorial));
+END e3.

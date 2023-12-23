@@ -1,0 +1,22 @@
+MODULE e2;
+
+CONST
+    a = 10;
+
+VAR
+    b: INTEGER;
+    res: STRING;
+
+BEGIN
+    b := 8;
+
+    IF a > b THEN
+        res := "a > b";
+    ELSIF a < b THEN
+        res := "a < b";
+    ELSE
+        res := "a = b";
+    END;
+
+    PRINT_STR(res);
+END e2.
