@@ -18,11 +18,11 @@ class TreeListener(private val parser: OberonParser) : OberonBaseListener() {
             variables["REAL"] = Variable.Empty
             variables["STRING"] = Variable.Empty
         }
-
-        programContext.apply {
-            procedures["PRINT_STR"] = ""
-            procedures["PRINT_INT"] = ""
-        }
+//
+//        programContext.apply {
+//            procedures["PRINT_STR"] = ""
+//            procedures["PRINT_INT"] = ""
+//        }
     }
 
     override fun enterConstDeclaration(ctx: OberonParser.ConstDeclarationContext) {
@@ -39,7 +39,7 @@ class TreeListener(private val parser: OberonParser) : OberonBaseListener() {
 
     override fun enterProcedureHeading(ctx: OberonParser.ProcedureHeadingContext) {
         val procedureName = ctx.ident().text
-        programContext.procedures[procedureName] = ""
+//        programContext.procedures[procedureName] = ""
     }
 
     override fun enterProcedureDeclaration(ctx: OberonParser.ProcedureDeclarationContext) {

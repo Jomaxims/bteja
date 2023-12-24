@@ -175,7 +175,7 @@ exitStatement
    ;
 
 returnStatement
-   : RETURN expression
+   : RETURN (expression)?
    ;
 
 procedureDeclaration
@@ -199,7 +199,7 @@ procedureParameters
    ;
 
 fPSection
-   : VAR? ident ':' type
+   : ident ':' type
    ;
 
 ARRAY

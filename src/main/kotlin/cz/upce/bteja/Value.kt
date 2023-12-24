@@ -26,6 +26,8 @@ sealed class Value(val type: DataType) {
     fun <T : Any> asPrimitive() = this as PrimitiveValue<T>
     fun <T : Any> asArray() = this as ArrayValue<T>
     fun <T : Any> asMatrix() = this as MatrixValue<T>
+
+    abstract fun valueToString(): String
 }
 
 class PrimitiveValue<T : Any>(val value: T, type: DataType) : Value(type) {
@@ -34,6 +36,8 @@ class PrimitiveValue<T : Any>(val value: T, type: DataType) : Value(type) {
 
         fun getTypedEmpty(type: DataType) = PrimitiveValue(Any(), type)
     }
+
+    override fun valueToString() = value.toString()
 
     override fun toString(): String {
         return "PrimitiveValue(value=$value, type=$type)"
@@ -56,6 +60,8 @@ class ArrayValue<T : Any>(val value: Array<PrimitiveValue<T>>, val ofType: DataT
         }
     }
 
+    override fun valueToString() = value.joinToString { it.valueToString() }
+
     override fun toString(): String {
         return "ArrayValue(value=${value.contentToString()}, ofType=$ofType)"
     }
@@ -77,6 +83,12 @@ class MatrixValue<T : Any>(val value: Array<Array<PrimitiveValue<T>>>, val ofTyp
         }
     }
 
+    override fun valueToString() = buildString {
+        value.forEach {
+            appendLine(it.joinToString { it.valueToString() })
+        }
+    }
+
     override fun toString(): String {
         return "MatrixValue(value=${value.contentToString()}, ofType=$ofType)"
     }
@@ -84,7 +96,7 @@ class MatrixValue<T : Any>(val value: Array<Array<PrimitiveValue<T>>>, val ofTyp
 
 fun TerminalNode.toIntValue() = PrimitiveValue(this.text.toInt(), DataType.INTEGER)
 fun TerminalNode.toRealValue() = PrimitiveValue(this.text.toDouble(), DataType.REAL)
-fun TerminalNode.toStringValue() = PrimitiveValue(this.text, DataType.STRING)
+fun TerminalNode.toStringValue() = PrimitiveValue(this.text.removeSuffix("\"").removePrefix("\""), DataType.STRING)
 
 data class Variable(var value: Value, val isConstant: Boolean = false) {
     var isInitialized = isConstant

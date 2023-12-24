@@ -1,12 +1,18 @@
 package cz.upce.bteja
 
+fun interface LibraryProcedure {
+    fun run(vararg vars: Value): Value?
+}
+
 class ProgramContext {
-    val procedures = mutableMapOf<String, String>()
+    val procedures = mutableMapOf<String, OberonParser.ProcedureDeclarationContext>()
+    val libraryProcedures = mutableMapOf<String, LibraryProcedure>()
 }
 
 class ExecutionContext(
     val programContext: ProgramContext,
-    val parentContext: ExecutionContext?
+    val parentContext: ExecutionContext?,
+    val isProcedure: Boolean = false,
 ) {
     val variables = mutableMapOf<String, Variable>()
     val hasParent get() = parentContext != null

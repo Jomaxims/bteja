@@ -9,26 +9,25 @@ fun main(args: Array<String>) {
     val lexer = OberonLexer(CharStreams.fromString(text))
     val tokenStream = CommonTokenStream(lexer).apply { fill() }
     val parser = OberonParser(tokenStream)
-//    ParseTreeWalker.DEFAULT.walk(TreeListener(parser), parser.module())
-    val visitor = InterpretVisitor()
-    val result = visitor.visit(parser.module())
-
-//    tokenStream.tokens.forEach { println("${lexer.vocabulary.getDisplayName(it.type)}: ${it.text}") }
+    InterpretVisitor().visit(parser.module())
 }
 
 val prog = """
-MODULE e1;
+MODULE e3;
 
 CONST
-    matrixSize = 4;
+    factorial = 3;
 
-VAR
-    res: INTEGER;
+PROCEDURE recFact(f: INTEGER): INTEGER;
+BEGIN
+    IF f <= 1 THEN
+        RETURN 1;
+    ELSE
+        RETURN f * recFact(f - 1);
+    END;
+END recFact;
 
 BEGIN
-    res := 0;
-    FOR j := 0 TO matrixSize BY 2 DO
-        res := res + j;
-    END;
-END e1.
+    PRINTLN("Factorial: ", recFact(factorial));
+END e3.
 """.trimIndent()

@@ -13,7 +13,7 @@ repositories {
 dependencies {
     implementation("org.antlr:antlr4:4.13.1")
 
-    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.9.21")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.21")
 
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.1")
     implementation("ch.qos.logback:logback-classic:1.4.12")

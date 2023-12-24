@@ -6,3 +6,6 @@ class VariableNotInitializedException(message: String? = null) : Exception(messa
 class AssignmentToConstantException(message: String? = null) : Exception(message)
 class InvalidDimensionsException(message: String? = null) : Exception(message)
 class IllegalRelationException(message: String? = null) : Exception(message)
+class NonExistentProcedureException(message: String? = null) : Exception(message)
+class WrongNumberOfParametersException(message: String? = null) : Exception(message)
+class ProcedureReturnedException(val value: Value? = null, message: String? = null) : Exception(message)

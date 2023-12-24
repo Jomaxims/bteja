@@ -23,10 +23,7 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
     private fun exitCurrentContext() = contexts.pop()
 
     private fun addDefaultProcedures() {
-        programContext.apply {
-            procedures["PRINT_STR"] = ""
-            procedures["PRINT_INT"] = ""
-        }
+        programContext.libraryProcedures += LibraryProcedures.procedures
     }
 
     override fun visitModule(ctx: OberonParser.ModuleContext): Value? {
@@ -35,6 +32,70 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
         ctx.visitChildren()
 
         return null
+    }
+
+    override fun visitProcedureDeclaration(ctx: OberonParser.ProcedureDeclarationContext): Value? {
+        val name = ctx.procedureHeading().ident().text
+
+        programContext.procedures[name] = ctx
+
+        return null
+    }
+
+    override fun visitProcedureCall(ctx: OberonParser.ProcedureCallContext): Value? {
+        val callName = ctx.ident().text
+        val callParameters = Array(ctx.actualParameters().expList()?.expression()?.size ?: 0) { i ->
+            ctx.actualParameters().expList().expression(i).visit()
+        }
+
+        programContext.libraryProcedures[callName]?.let {
+            return it.run(*callParameters)
+        }
+
+        val procedureContext = programContext.procedures[callName]
+        if (procedureContext == null) {
+            logger.error { "Procedura \"$callName\" neexistuje" }
+            throw NonExistentProcedureException("Procedura \"$callName\" neexistuje")
+        }
+
+        val procedureParameters = procedureContext.procedureHeading().procedureParameters()
+        if (procedureParameters.fPSection().size != callParameters.size) {
+            logger.error { "Procedura \"$callName\" má ${procedureParameters.fPSection().size} parametrů" }
+            throw WrongNumberOfParametersException("Procedura \"$callName\" má ${procedureParameters.fPSection().size} parametrů")
+        }
+
+        enterNewContext()
+
+        callParameters.forEachIndexed { i, value ->
+            val name = procedureContext.procedureHeading().procedureParameters().fPSection(i).ident().text
+            currentContext.variables[name] = Variable(value, true)
+        }
+
+        val procedureValue: Value? = procedureContext.procedureBody().visit()
+
+        exitCurrentContext()
+
+        return procedureValue
+    }
+
+    override fun visitProcedureBody(ctx: OberonParser.ProcedureBodyContext): Value? {
+        ctx.declarationSequence().visit()
+
+        try {
+            ctx.statementSequence().statement().forEach {
+                it.visit()
+            }
+        } catch (e: ProcedureReturnedException) {
+            return e.value
+        }
+
+        return null
+    }
+
+    override fun visitReturnStatement(ctx: OberonParser.ReturnStatementContext): Value? {
+        val value = ctx.visitChildren()
+
+        throw ProcedureReturnedException(value)
     }
 
     override fun visitConstDeclaration(ctx: OberonParser.ConstDeclarationContext): Value? {
@@ -153,6 +214,10 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
         val variableType = variable.value.type
         when (variableType) {
             DataType.ARRAY -> {
+                if (ctx.expression().size == 0) {
+                    return variable.value
+                }
+
                 if (ctx.expression().size != 1) {
                     logger.error { "Chybný počet dimenzí pro \"$name\"" }
                     throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"")
@@ -162,6 +227,10 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
             }
 
             DataType.MATRIX -> {
+                if (ctx.expression().size == 0) {
+                    return variable.value
+                }
+
                 if (ctx.expression().size != 2) {
                     logger.error { "Chybný počet dimenzí pro \"$name\"" }
                     throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"")
@@ -182,6 +251,7 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
         ctx.STRING()?.let {
             return it.toStringValue()
         }
+
         return ctx.visitChildren()
     }
 
@@ -224,7 +294,7 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
                 return PrimitiveValue(value, DataType.REAL)
             }
 
-            else -> throw IllegalTypeException("Neplatný typ")
+            else -> return first
         }
     }
 
@@ -236,11 +306,11 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
                 var value = first.asPrimitive<Int>().value
                 ctx.mulOperator().forEachIndexed { i, mulOperatorCtx ->
                     if (mulOperatorCtx.MULT() != null) {
-                        value *= visit(ctx.factor(i + 1)).asPrimitive<Int>().value
+                        value *= ctx.factor(i + 1).visit().asPrimitive<Int>().value
                     } else if (mulOperatorCtx.DIV() != null) {
-                        value /= visit(ctx.factor(i + 1)).asPrimitive<Int>().value
+                        value /= ctx.factor(i + 1).visit().asPrimitive<Int>().value
                     } else if (mulOperatorCtx.MOD() != null) {
-                        value = value.mod(visit(ctx.factor(i + 1)).asPrimitive<Int>().value)
+                        value = value.mod(ctx.factor(i + 1).visit().asPrimitive<Int>().value)
                     }
                 }
 
@@ -251,16 +321,16 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
                 var value = first.asPrimitive<Double>().value
                 ctx.mulOperator().forEachIndexed { i, mulOperatorCtx ->
                     if (mulOperatorCtx.MULT() != null) {
-                        value *= visit(ctx.factor(i + 1)).asPrimitive<Double>().value
+                        value *= ctx.factor(i + 1).visit().asPrimitive<Double>().value
                     } else if (mulOperatorCtx.DIV() != null) {
-                        value /= visit(ctx.factor(i + 1)).asPrimitive<Double>().value
+                        value /= ctx.factor(i + 1).visit().asPrimitive<Double>().value
                     }
                 }
 
                 return PrimitiveValue(value, DataType.REAL)
             }
 
-            else -> throw IllegalTypeException("Neplatný typ")
+            else -> return first
         }
     }
 
