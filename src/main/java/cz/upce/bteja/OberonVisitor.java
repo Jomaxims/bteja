@@ -71,6 +71,12 @@ public interface OberonVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpression(OberonParser.ExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link OberonParser#boolExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoolExpression(OberonParser.BoolExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link OberonParser#relation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

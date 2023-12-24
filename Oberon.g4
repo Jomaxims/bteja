@@ -95,12 +95,16 @@ expression
    | STRING
    ;
 
+boolExpression
+   : left=simpleExpression relation right=simpleExpression
+   ;
+
 relation
-   : '='
-   | '<'
-   | '<='
-   | '>'
-   | '>='
+   : EQUALS
+   | LESS_THAN
+   | LESS_THAN_EQUALS
+   | MORE_THAN
+   | MORE_THAN
    ;
 
 simpleExpression
@@ -159,11 +163,11 @@ statementSequence
    ;
 
 ifStatement
-   : IF expression THEN statementSequence (ELSIF expression THEN statementSequence)* (ELSE statementSequence)? END
+   : IF ifExpression=boolExpression THEN ifStatementSequence=statementSequence (ELSIF elseIfExpression=boolExpression THEN elseIfStatementSequence=statementSequence)* (ELSE elseStatementSequence=statementSequence)? END
    ;
 
 forStatement
-   : FOR ident ':=' expression TO expression (BY expression)? DO statementSequence END
+   : FOR ident ':=' simpleExpression TO simpleExpression (BY simpleExpression)? DO statementSequence END
    ;
 
 exitStatement
@@ -240,6 +244,26 @@ PLUS
 
 MINUS
    : '-'
+   ;
+
+EQUALS
+   : '='
+   ;
+
+LESS_THAN
+   : '<'
+   ;
+
+MORE_THAN
+   : '>'
+   ;
+
+LESS_THAN_EQUALS
+   : '<='
+   ;
+
+MORE_THAN_EQUALS
+   : '>='
    ;
 
 IF

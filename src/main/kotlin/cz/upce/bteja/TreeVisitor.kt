@@ -78,10 +78,11 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
             val sizeX = ctx.type().matrixType().length(0).visit().asPrimitive<Int>().value
             val sizeY = ctx.type().matrixType().length(1).visit().asPrimitive<Int>().value
             ctx.identList().ident().forEach {
-                currentContext.variables[it.text] = Variable(MatrixValue.getTypedEmpty(sizeX, sizeY, subType!!), false).apply {
-                    isInitialized = true
-                    logger.debug { "Vytvořena proměnná \"${it.text}\": $this" }
-                }
+                currentContext.variables[it.text] =
+                    Variable(MatrixValue.getTypedEmpty(sizeX, sizeY, subType!!), false).apply {
+                        isInitialized = true
+                        logger.debug { "Vytvořena proměnná \"${it.text}\": $this" }
+                    }
             }
         }
 
@@ -113,6 +114,7 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
 
                 variable.value.asArray<Any>().value[index] = value.asPrimitive()
             }
+
             DataType.MATRIX -> {
                 if (ctx.designator().expression().size != 2) {
                     logger.error { "Chybný počet dimenzí pro \"$name\"" }
@@ -123,6 +125,7 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
 
                 variable.value.asMatrix<Any>().value[indexX][indexY] = value.asPrimitive()
             }
+
             else -> {
                 variable.setNewValue(value)
             }
@@ -150,6 +153,7 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
                 val index = ctx.expression(0).visit().asPrimitive<Int>().value
                 return variable.value.asArray<Any>().value[index]
             }
+
             DataType.MATRIX -> {
                 if (ctx.expression().size != 2) {
                     logger.error { "Chybný počet dimenzí pro \"$name\"" }
@@ -160,6 +164,7 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
 
                 return variable.value.asMatrix<Any>().value[indexX][indexY]
             }
+
             else -> {
                 return variable.value
             }
@@ -267,6 +272,41 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
         }
         ctx.procedureCall()?.let {
             return visit(it)
+        }
+
+        return null
+    }
+
+    override fun visitIfStatement(ctx: OberonParser.IfStatementContext): Value? {
+        var visited = false
+
+        ctx.boolExpression().forEachIndexed { i, boolExpressionContext ->
+            val left = boolExpressionContext.left.visit() as PrimitiveValue<*>
+            val right = boolExpressionContext.right.visit() as PrimitiveValue<*>
+            val operator = boolExpressionContext.relation().text
+
+            val compared = compareValuesBy(left, right) {
+                it.value as Comparable<*>
+            }
+            val result = when (operator) {
+                "=" -> compared == 0
+                "<" -> compared < 0
+                "<=" -> compared <= 0
+                ">" -> compared > 0
+                ">=" -> compared >= 0
+                else -> throw IllegalRelationException()
+            }
+
+            if (result) {
+                ctx.statementSequence(i).visitChildren()
+                visited = true
+                return@forEachIndexed
+            }
+        }
+
+        ctx.elseStatementSequence?.let {
+            if (!visited)
+                it.visitChildren()
         }
 
         return null

@@ -19,24 +19,25 @@ fun main(args: Array<String>) {
 }
 
 val prog = """
-MODULE Basic;
+MODULE e2;
 
 CONST
-    pepa = 10;
+    a = 10;
 
 VAR
-a, b : REAL;
-c : STRING;
-d: ARRAY 5 OF INTEGER;
-e: MATRIX 2,6 OF INTEGER;
+    b: INTEGER;
+    res: STRING;
 
 BEGIN
+    b := 10;
 
-a := 1+((4+7)*1+3)*2;
-b := 3;
-c := "aksjd okashzd xlcvkhj";
-d[0] := 5;
-e[0,2] := d[0];
+    IF a > b THEN
+        res := "a > b";
+    ELSIF a < b THEN
+        res := "a < b";
+    ELSE
+        res := "a = b";
+    END;
+END e2.
 
-END Basic.
 """.trimIndent()

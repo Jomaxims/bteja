@@ -108,6 +108,16 @@ public interface OberonListener extends ParseTreeListener {
 	 */
 	void exitExpression(OberonParser.ExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link OberonParser#boolExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBoolExpression(OberonParser.BoolExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OberonParser#boolExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBoolExpression(OberonParser.BoolExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link OberonParser#relation}.
 	 * @param ctx the parse tree
 	 */
