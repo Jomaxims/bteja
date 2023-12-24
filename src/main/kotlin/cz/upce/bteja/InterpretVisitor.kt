@@ -48,20 +48,24 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
             ctx.actualParameters().expList().expression(i).visit()
         }
 
-        programContext.libraryProcedures[callName]?.let {
-            return it.run(*callParameters)
+        try {
+            programContext.libraryProcedures[callName]?.let {
+                return it.run(*callParameters)
+            }
+        } catch (e: OberonException) {
+            throw e.apply { e.context = ctx }
         }
 
         val procedureContext = programContext.procedures[callName]
         if (procedureContext == null) {
             logger.error { "Procedura \"$callName\" neexistuje" }
-            throw NonExistentProcedureException("Procedura \"$callName\" neexistuje")
+            throw NonExistentProcedureException("Procedura \"$callName\" neexistuje", ctx)
         }
 
         val procedureParameters = procedureContext.procedureHeading().procedureParameters()
         if (procedureParameters.fPSection().size != callParameters.size) {
             logger.error { "Procedura \"$callName\" má ${procedureParameters.fPSection().size} parametrů" }
-            throw WrongNumberOfParametersException("Procedura \"$callName\" má ${procedureParameters.fPSection().size} parametrů")
+            throw WrongNumberOfParametersException("Procedura \"$callName\" má ${procedureParameters.fPSection().size} parametrů", ctx)
         }
 
         enterNewContext()
@@ -159,11 +163,11 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
 
         if (variable == null) {
             logger.error { "Proměnná \"$name\" neexistuje" }
-            throw NonExistentVariableException("Proměnná \"$name\" neexistuje")
+            throw NonExistentVariableException("Proměnná \"$name\" neexistuje", ctx)
         }
         if (variable.isConstant) {
             logger.error { "\"$name\" je konstanta" }
-            throw AssignmentToConstantException("\"$name\" je konstanta")
+            throw AssignmentToConstantException("\"$name\" je konstanta", ctx)
         }
 
         val value = ctx.expression().visit()
@@ -172,7 +176,7 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
             DataType.ARRAY -> {
                 if (ctx.designator().expression().size != 1) {
                     logger.error { "Chybný počet dimenzí pro \"$name\"" }
-                    throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"")
+                    throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"", ctx)
                 }
                 val index = ctx.designator().expression(0).visit().asPrimitive<Int>().value
 
@@ -182,7 +186,7 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
             DataType.MATRIX -> {
                 if (ctx.designator().expression().size != 2) {
                     logger.error { "Chybný počet dimenzí pro \"$name\"" }
-                    throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"")
+                    throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"", ctx)
                 }
                 val indexX = ctx.designator().expression(0).visit().asPrimitive<Int>().value
                 val indexY = ctx.designator().expression(1).visit().asPrimitive<Int>().value
@@ -204,11 +208,11 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
 
         if (variable == null) {
             logger.error { "Proměnná/konstanta \"$name\" neexistuje" }
-            throw NonExistentVariableException("Proměnná/konstanta \"$name\" neexistuje")
+            throw NonExistentVariableException("Proměnná/konstanta \"$name\" neexistuje", ctx)
         }
         if (!variable.isInitialized) {
             logger.error { "Proměnná \"$name\" není inicializovaná" }
-            throw VariableNotInitializedException("Proměnná \"$name\" není inicializovaná")
+            throw VariableNotInitializedException("Proměnná \"$name\" není inicializovaná", ctx)
         }
 
         val variableType = variable.value.type
@@ -220,7 +224,7 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
 
                 if (ctx.expression().size != 1) {
                     logger.error { "Chybný počet dimenzí pro \"$name\"" }
-                    throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"")
+                    throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"", ctx)
                 }
                 val index = ctx.expression(0).visit().asPrimitive<Int>().value
                 return variable.value.asArray<Any>().value[index]
@@ -233,7 +237,7 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
 
                 if (ctx.expression().size != 2) {
                     logger.error { "Chybný počet dimenzí pro \"$name\"" }
-                    throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"")
+                    throw InvalidDimensionsException("Chybný počet dimenzí pro \"$name\"", ctx)
                 }
                 val indexX = ctx.expression(0).visit().asPrimitive<Int>().value
                 val indexY = ctx.expression(1).visit().asPrimitive<Int>().value

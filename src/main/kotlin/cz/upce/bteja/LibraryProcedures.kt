@@ -22,22 +22,30 @@ object LibraryProcedures {
     }
 
     val LEN = LibraryProcedure {
+        if (it.size != 1)
+            throw WrongNumberOfParametersException("Neplatný počet parametrů")
         if (it.first().type != DataType.ARRAY)
-            throw IllegalTypeException()
+            throw IllegalTypeException("Neplatný typ ${it.first().type}")
 
         return@LibraryProcedure PrimitiveValue(it.first().asArray<Any>().value.size, DataType.INTEGER)
     }
 
     val LEN_X = LibraryProcedure {
+        if (it.size != 1)
+            throw WrongNumberOfParametersException("Neplatný počet parametrů")
+
         if (it.first().type != DataType.MATRIX)
-            throw IllegalTypeException()
+            throw IllegalTypeException("Neplatný typ ${it.first().type}")
 
         return@LibraryProcedure PrimitiveValue(it.first().asMatrix<Any>().value.size, DataType.INTEGER)
     }
 
     val LEN_Y = LibraryProcedure {
+        if (it.size != 1)
+            throw WrongNumberOfParametersException("Neplatný počet parametrů")
+
         if (it.first().type != DataType.MATRIX)
-            throw IllegalTypeException()
+            throw IllegalTypeException("Neplatný typ ${it.first().type}")
 
         return@LibraryProcedure PrimitiveValue(it.first().asMatrix<Any>().value.first().size, DataType.INTEGER)
     }

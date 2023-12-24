@@ -9,7 +9,12 @@ fun main(args: Array<String>) {
     val lexer = OberonLexer(CharStreams.fromString(text))
     val tokenStream = CommonTokenStream(lexer).apply { fill() }
     val parser = OberonParser(tokenStream)
-    InterpretVisitor().visit(parser.module())
+
+    try {
+        InterpretVisitor().visit(parser.module())
+    } catch (e: OberonException) {
+        println("Chyba na řádku ${e.context?.start?.line}: ${e.message}")
+    }
 }
 
 val prog = """
@@ -29,5 +34,6 @@ END recFact;
 
 BEGIN
     PRINTLN("Factorial: ", recFact(factorial));
+    recFact("factorial")
 END e3.
 """.trimIndent()
