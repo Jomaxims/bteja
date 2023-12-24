@@ -2,8 +2,6 @@ package cz.upce.bteja
 
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.tree.ParseTreeWalker
-import java.io.File
 
 fun main(args: Array<String>) {
 //    val text = File("./example.txt").readText()
@@ -12,7 +10,7 @@ fun main(args: Array<String>) {
     val tokenStream = CommonTokenStream(lexer).apply { fill() }
     val parser = OberonParser(tokenStream)
 //    ParseTreeWalker.DEFAULT.walk(TreeListener(parser), parser.module())
-    val visitor = TreeVisitor()
+    val visitor = InterpretVisitor()
     val result = visitor.visit(parser.module())
 
 //    tokenStream.tokens.forEach { println("${lexer.vocabulary.getDisplayName(it.type)}: ${it.text}") }

@@ -5,12 +5,12 @@ import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.RuleNode
 import java.util.*
 
-class TreeVisitor : OberonBaseVisitor<Value>() {
+class InterpretVisitor : OberonBaseVisitor<Value>() {
     val programContext = ProgramContext()
     val contexts = Stack<ExecutionContext>()
     private val logger = KotlinLogging.logger { }
 
-    val currentContext get() = contexts.peek()
+    val currentContext get() = contexts.peek()!!
 
     init {
         addDefaultProcedures()

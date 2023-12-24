@@ -1,14 +1,6 @@
 package cz.upce.bteja
 
-import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
-
-class IllegalTypeException(message: String? = null) : Exception(message)
-class NonExistentVariableException(message: String? = null) : Exception(message)
-class VariableNotInitializedException(message: String? = null) : Exception(message)
-class AssignmentToConstantException(message: String? = null) : Exception(message)
-class InvalidDimensionsException(message: String? = null) : Exception(message)
-class IllegalRelationException(message: String? = null) : Exception(message)
 
 enum class DataType {
     INTEGER,
@@ -104,35 +96,5 @@ data class Variable(var value: Value, val isConstant: Boolean = false) {
     fun setNewValue(value: Value) {
         this.value = value
         isInitialized = true
-    }
-}
-
-//fun <T:Any> T.toValue() = Value(this)
-
-class ProgramContext {
-    val procedures = mutableMapOf<String, String>()
-}
-
-class ExecutionContext(
-    val programContext: ProgramContext,
-    val parentContext: ExecutionContext?
-) {
-    val variables = mutableMapOf<String, Variable>()
-    val hasParent get() = parentContext != null
-
-    fun hasVariable(name: String): Boolean =
-        if (variables.keys.contains(name))
-            true
-        else if (!hasParent)
-            false
-        else parentContext!!.hasVariable(name)
-
-    fun getVariable(name: String): Variable? {
-        var variable: Variable? = variables[name]
-
-        if (variable == null && hasParent)
-            variable = parentContext!!.getVariable(name)
-
-        return variable
     }
 }
