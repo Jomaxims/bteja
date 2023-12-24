@@ -19,6 +19,9 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
     private fun ParseTree.visit() = visit(this)
     private fun RuleNode.visitChildren() = visitChildren(this)
 
+    private fun enterNewContext() = contexts.push(ExecutionContext(programContext, currentContext))
+    private fun exitCurrentContext() = contexts.pop()
+
     private fun addDefaultProcedures() {
         programContext.apply {
             procedures["PRINT_STR"] = ""
@@ -141,6 +144,10 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
         if (variable == null) {
             logger.error { "Proměnná/konstanta \"$name\" neexistuje" }
             throw NonExistentVariableException("Proměnná/konstanta \"$name\" neexistuje")
+        }
+        if (!variable.isInitialized) {
+            logger.error { "Proměnná \"$name\" není inicializovaná" }
+            throw VariableNotInitializedException("Proměnná \"$name\" není inicializovaná")
         }
 
         val variableType = variable.value.type
@@ -308,6 +315,28 @@ class TreeVisitor : OberonBaseVisitor<Value>() {
             if (!visited)
                 it.visitChildren()
         }
+
+        return null
+    }
+
+    override fun visitForStatement(ctx: OberonParser.ForStatementContext): Value? {
+        enterNewContext()
+
+        val counterName = ctx.ident().text
+        val counterValue = ctx.counterExpression.visit()
+        currentContext.variables[counterName] = Variable(counterValue, true)
+
+        val fromValue = counterValue.asPrimitive<Int>().value
+        val toValue = ctx.toExpression.visit().asPrimitive<Int>().value
+        val byValue = ctx.byExpression?.visit()?.asPrimitive<Int>()?.value ?: 1
+
+        for (counter in fromValue..<toValue step byValue) {
+            currentContext.variables[counterName]!!.value = PrimitiveValue(counter, DataType.INTEGER)
+            logger.debug { "Counter $counter na ${currentContext.variables[counterName]!!.value}" }
+            ctx.statementSequence().visitChildren()
+        }
+
+        exitCurrentContext()
 
         return null
     }

@@ -1830,15 +1830,12 @@ public class OberonParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class ForStatementContext extends ParserRuleContext {
+		public SimpleExpressionContext counterExpression;
+		public SimpleExpressionContext toExpression;
+		public SimpleExpressionContext byExpression;
 		public TerminalNode FOR() { return getToken(OberonParser.FOR, 0); }
 		public IdentContext ident() {
 			return getRuleContext(IdentContext.class,0);
-		}
-		public List<SimpleExpressionContext> simpleExpression() {
-			return getRuleContexts(SimpleExpressionContext.class);
-		}
-		public SimpleExpressionContext simpleExpression(int i) {
-			return getRuleContext(SimpleExpressionContext.class,i);
 		}
 		public TerminalNode TO() { return getToken(OberonParser.TO, 0); }
 		public TerminalNode DO() { return getToken(OberonParser.DO, 0); }
@@ -1846,6 +1843,12 @@ public class OberonParser extends Parser {
 			return getRuleContext(StatementSequenceContext.class,0);
 		}
 		public TerminalNode END() { return getToken(OberonParser.END, 0); }
+		public List<SimpleExpressionContext> simpleExpression() {
+			return getRuleContexts(SimpleExpressionContext.class);
+		}
+		public SimpleExpressionContext simpleExpression(int i) {
+			return getRuleContext(SimpleExpressionContext.class,i);
+		}
 		public TerminalNode BY() { return getToken(OberonParser.BY, 0); }
 		public ForStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1880,11 +1883,11 @@ public class OberonParser extends Parser {
 			setState(248);
 			match(T__8);
 			setState(249);
-			simpleExpression();
+			((ForStatementContext)_localctx).counterExpression = simpleExpression();
 			setState(250);
 			match(TO);
 			setState(251);
-			simpleExpression();
+			((ForStatementContext)_localctx).toExpression = simpleExpression();
 			setState(254);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -1893,7 +1896,7 @@ public class OberonParser extends Parser {
 				setState(252);
 				match(BY);
 				setState(253);
-				simpleExpression();
+				((ForStatementContext)_localctx).byExpression = simpleExpression();
 				}
 			}
 

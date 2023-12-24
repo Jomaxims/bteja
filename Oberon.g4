@@ -167,7 +167,7 @@ ifStatement
    ;
 
 forStatement
-   : FOR ident ':=' simpleExpression TO simpleExpression (BY simpleExpression)? DO statementSequence END
+   : FOR ident ':=' counterExpression=simpleExpression TO toExpression=simpleExpression (BY byExpression=simpleExpression)? DO statementSequence END
    ;
 
 exitStatement

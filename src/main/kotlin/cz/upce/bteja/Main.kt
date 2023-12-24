@@ -19,25 +19,18 @@ fun main(args: Array<String>) {
 }
 
 val prog = """
-MODULE e2;
+MODULE e1;
 
 CONST
-    a = 10;
+    matrixSize = 4;
 
 VAR
-    b: INTEGER;
-    res: STRING;
+    res: INTEGER;
 
 BEGIN
-    b := 10;
-
-    IF a > b THEN
-        res := "a > b";
-    ELSIF a < b THEN
-        res := "a < b";
-    ELSE
-        res := "a = b";
+    res := 0;
+    FOR j := 0 TO matrixSize BY 2 DO
+        res := res + j;
     END;
-END e2.
-
+END e1.
 """.trimIndent()
