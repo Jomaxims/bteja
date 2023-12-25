@@ -2,7 +2,7 @@ package cz.upce.bteja.semantickaAnalyza
 
 // Základní třída pro všechny uzly AST
 abstract class AstNode {
-    abstract fun <T> accept(visitor: AstVisitor<T>): T
+    abstract fun <T> accept(visitor: AstVisitor<Type>): Type
 }
 
 // Typy
@@ -23,7 +23,7 @@ data class ModuleNode(
     val declarations: DeclarationSequence,
     val statementSequence: StatementSequence?
 ) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Sekvence deklarací
@@ -32,7 +32,7 @@ data class DeclarationSequence(
     val varDeclarations: List<VariableDeclaration>,
     val procedureDeclarations: List<ProcedureDeclaration>
 ) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Deklarace konstanty
@@ -40,7 +40,7 @@ data class ConstDeclaration(
     val name: String,
     val expression: Expression
 ) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Deklarace proměnné
@@ -48,12 +48,12 @@ data class VariableDeclaration(
     val names: List<String>,
     val type: Type
 ) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Výrazy
 sealed class Expression : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = when (this) {
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = when (this) {
         is BinaryExpression -> visitor.visit(this)
         is UnaryExpression -> visitor.visit(this)
         is LiteralExpression -> visitor.visit(this)
@@ -66,10 +66,9 @@ sealed class Expression : AstNode() {
     }
 }
 
-
 // Sekvence příkazů
 data class StatementSequence(val statements: List<Statement>) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Příkazy
@@ -86,7 +85,8 @@ sealed class Statement : AstNode() {
         val condition: Expression,
         val thenStatements: StatementSequence
     ) : Statement()
-    override fun <T> accept(visitor: AstVisitor<T>): T = when(this) {
+
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = when(this) {
         is Assignment -> visitor.visit(this)
         is IfStatement -> visitor.visit(this)
         is ElsifStatement -> visitor.visit(this)
@@ -99,7 +99,7 @@ data class ProcedureDeclaration(
     val parameters: List<Parameter>,
     val body: StatementSequence
 ) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Parametry
@@ -107,12 +107,12 @@ data class Parameter(
     val names: List<String>,
     val type: Type
 ) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Identifikátory
 data class Identifier(val name: String) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Operátory
@@ -129,7 +129,7 @@ sealed class Operator : AstNode() {
     object GreaterThan : Operator()
     object GreaterThanOrEqual : Operator()
 
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Literály
@@ -140,7 +140,7 @@ sealed class Literal : AstNode() {
     object BooleanLiteralTrue : Literal()
     object BooleanLiteralFalse : Literal()
 
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Výrazy pro identifikátory
@@ -155,21 +155,32 @@ data class Designator(
     val identifier: Identifier,
     val selectors: List<Selector>
 ) : AstNode() {
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
-
 
 // Selectory (přistup k prvkům pole atd.)
 sealed class Selector : AstNode() {
     data class ArraySelector(val index: Expression) : Selector()
 
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(this)
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
 }
 
 // Pomocné třídy pro přístup k prvku pole nebo pro volání funkcí
-data class ArrayAccess(val array: Expression, val index: Expression) : Expression()
-data class FunctionCall(val function: Identifier, val arguments: List<Expression>) : Expression()
-data class BinaryExpression(val left: Expression, val op: String, val right: Expression) : Expression()
-data class UnaryExpression(val op: String, val expr: Expression) : Expression()
-data class LiteralExpression(val literal: Literal) : Expression()
-data class VariableExpression(val name: String) : Expression()
+data class ArrayAccess(val array: Expression, val index: Expression) : Expression() {
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
+}
+data class FunctionCall(val function: Identifier, val arguments: List<Expression>) : Expression() {
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
+}
+data class BinaryExpression(val left: Expression, val op: String, val right: Expression) : Expression() {
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
+}
+data class UnaryExpression(val op: String, val expr: Expression) : Expression() {
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
+}
+data class LiteralExpression(val literal: Literal) : Expression() {
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
+}
+data class VariableExpression(val name: String) : Expression() {
+    override fun <T> accept(visitor: AstVisitor<Type>): Type = visitor.visit(this)
+}
