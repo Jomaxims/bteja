@@ -147,7 +147,7 @@ actualParameters
    ;
 
 statement
-   : (assignment | procedureCall | ifStatement | forStatement | exitStatement | returnStatement)?
+   : (assignment | procedureCall | ifStatement | forStatement | returnStatement)?
    ;
 
 assignment
@@ -168,10 +168,6 @@ ifStatement
 
 forStatement
    : FOR ident ':=' counterExpression=simpleExpression TO toExpression=simpleExpression (BY byExpression=simpleExpression)? DO statementSequence END
-   ;
-
-exitStatement
-   : EXIT
    ;
 
 returnStatement
@@ -312,10 +308,6 @@ VAR
 
 MODULE
    : 'MODULE'
-   ;
-
-EXIT
-   : 'EXIT'
    ;
 
 STRING

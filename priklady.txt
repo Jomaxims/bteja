@@ -20,7 +20,7 @@ END printRealMatrix;
 BEGIN
     FOR i := 0 TO LEN_X(mat) DO
         FOR j := 0 TO LEN_Y(mat) DO
-            mat[i, j] := i + j;
+            mat[i, j] := INT_TO_REAL(i) + INT_TO_REAL(j);
         END;
     END;
 
@@ -42,7 +42,9 @@ VAR
     res: STRING;
 
 BEGIN
-    b := 8;
+    PRINTLN("a = ", a);
+    PRINT("Zadejte b: ");
+    b := READ_INT();
 
     IF a > b THEN
         res := "a > b";
@@ -62,17 +64,38 @@ END e2.
 MODULE e3;
 
 CONST
-    factorial = 10;
+    maxFactorial = 20;
+
+VAR
+    factorial: INTEGER;
+    factorials: ARRAY maxFactorial OF INTEGER;
 
 PROCEDURE recFact(f: INTEGER): INTEGER;
+VAR res: INTEGER;
 BEGIN
     IF f <= 1 THEN
-        RETURN 1;
+        res := 1;
     ELSE
-        RETURN f * recFact(f - 1);
+        res := f * recFact(f - 1);
     END;
+
+    factorials[f] := res;
+
+    RETURN res;
 END recFact;
 
 BEGIN
-    PRINT("Factorial: ", recFact(factorial));
+    PRINT("Zadejte číslo faktoriálu (max ", maxFactorial, "): ");
+    factorial := READ_INT();
+    IF factorial > maxFactorial THEN
+        PRINTLN("Neplatné číslo ", factorial);
+        EXIT()
+    END;
+
+    recFact(factorial);
+    PRINTLN("Faktoriály: ");
+
+    FOR i := 1 TO factorial+1 DO
+        PRINTLN(i, ": ", factorials[i])
+    END;
 END e3.

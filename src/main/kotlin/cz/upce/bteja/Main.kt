@@ -5,7 +5,10 @@ import org.antlr.v4.runtime.CommonTokenStream
 import java.io.File
 
 fun main(args: Array<String>) {
-    val text = File("./program.txt").readText()
+    val text = File("./program.o").readText()
+
+    if (getParser(text).apply { module() }.numberOfSyntaxErrors != 0)
+        return
 
     val semanticAnalyzer = SemanticVisitor()
     semanticAnalyzer.visit(getParser(text).module())
@@ -17,7 +20,8 @@ fun main(args: Array<String>) {
     try {
         InterpretVisitor().visit(getParser(text).module())
     } catch (e: OberonException) {
-        println("Chyba na řádku ${e.context?.start?.line}: ${e.message}")
+        if (e !is ProgramExitException)
+            println("Chyba na řádku ${e.context?.start?.line}: ${e.message}")
     }
 }
 

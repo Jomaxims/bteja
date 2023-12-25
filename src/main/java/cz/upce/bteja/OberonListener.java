@@ -268,16 +268,6 @@ public interface OberonListener extends ParseTreeListener {
 	 */
 	void exitForStatement(OberonParser.ForStatementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link OberonParser#exitStatement}.
-	 * @param ctx the parse tree
-	 */
-	void enterExitStatement(OberonParser.ExitStatementContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link OberonParser#exitStatement}.
-	 * @param ctx the parse tree
-	 */
-	void exitExitStatement(OberonParser.ExitStatementContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link OberonParser#returnStatement}.
 	 * @param ctx the parse tree
 	 */

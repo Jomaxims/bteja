@@ -19,12 +19,20 @@ object LibraryProcedures {
                 .filter { it.returnType == typeOf<LibraryProcedure>() }
                 .associate { it.name to it.get(this) as LibraryProcedure }
 
+    val EXIT = LibraryProcedure(
+        "EXIT",
+        null,
+        null
+    ) {
+        throw ProgramExitException()
+    }
+
     val PRINT = LibraryProcedure(
         "PRINT",
         null,
         null
     ) {
-        println(it.joinToString("") { it.valueToString() })
+        print(it.joinToString("") { it.valueToString() })
 
         return@LibraryProcedure null
     }
@@ -39,16 +47,41 @@ object LibraryProcedures {
         return@LibraryProcedure null
     }
 
+    val READ_STR = LibraryProcedure(
+        "READ_STR",
+        null,
+        PrimitiveValue.getTypedEmpty(DataType.STRING)
+    ) {
+        val value = readln()
+
+        return@LibraryProcedure PrimitiveValue(value, DataType.STRING)
+    }
+
+    val READ_INT = LibraryProcedure(
+        "READ_INT",
+        null,
+        PrimitiveValue.getTypedEmpty(DataType.INTEGER)
+    ) {
+        val value = readln().toIntOrNull() ?: throw IllegalTypeException("Očekáván typ INTEGER")
+
+        return@LibraryProcedure PrimitiveValue(value, DataType.INTEGER)
+    }
+
+    val READ_REAL = LibraryProcedure(
+        "READ_REAL",
+        null,
+        PrimitiveValue.getTypedEmpty(DataType.REAL)
+    ) {
+        val value = readln().toDoubleOrNull() ?: throw IllegalTypeException("Očekáván typ REAL")
+
+        return@LibraryProcedure PrimitiveValue(value, DataType.REAL)
+    }
+
     val LEN = LibraryProcedure(
         "LEN",
         arrayOf(ArrayValue.getTypedEmpty(0, DataType.ANY)),
         PrimitiveValue.getTypedEmpty(DataType.INTEGER)
     ) {
-        if (it.size != parameters!!.size)
-            throw WrongNumberOfParametersException("Neplatný počet parametrů")
-        if (it.first().type != parameters.first().type)
-            throw IllegalTypeException("Neplatný typ ${it.first().type}")
-
         return@LibraryProcedure PrimitiveValue(it.first().asArray<Any>().value.size, DataType.INTEGER)
     }
 
@@ -57,12 +90,6 @@ object LibraryProcedures {
         arrayOf(MatrixValue.getTypedEmpty(0, 0, DataType.ANY)),
         PrimitiveValue.getTypedEmpty(DataType.INTEGER)
     ) {
-        if (it.size != parameters!!.size)
-            throw WrongNumberOfParametersException("Neplatný počet parametrů")
-
-        if (it.first().type != parameters.first().type)
-            throw IllegalTypeException("Neplatný typ ${it.first().type}")
-
         return@LibraryProcedure PrimitiveValue(it.first().asMatrix<Any>().value.size, DataType.INTEGER)
     }
 
@@ -71,12 +98,14 @@ object LibraryProcedures {
         arrayOf(MatrixValue.getTypedEmpty(0, 0, DataType.ANY)),
         PrimitiveValue.getTypedEmpty(DataType.INTEGER)
     ) {
-        if (it.size != parameters!!.size)
-            throw WrongNumberOfParametersException("Neplatný počet parametrů")
-
-        if (it.first().type != parameters.first().type)
-            throw IllegalTypeException("Neplatný typ ${it.first().type}")
-
         return@LibraryProcedure PrimitiveValue(it.first().asMatrix<Any>().value.first().size, DataType.INTEGER)
+    }
+
+    val INT_TO_REAL = LibraryProcedure(
+        "INT_TO_REAL",
+        arrayOf(PrimitiveValue.getTypedEmpty(DataType.INTEGER)),
+        PrimitiveValue.getTypedEmpty(DataType.REAL)
+    ) {
+        return@LibraryProcedure PrimitiveValue(it.first().asPrimitive<Int>().value.toDouble(), DataType.REAL)
     }
 }

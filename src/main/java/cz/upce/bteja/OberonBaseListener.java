@@ -329,18 +329,6 @@ public class OberonBaseListener implements OberonListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExitStatement(OberonParser.ExitStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExitStatement(OberonParser.ExitStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterReturnStatement(OberonParser.ReturnStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}

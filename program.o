@@ -1,0 +1,38 @@
+MODULE e3;
+
+CONST
+    maxFactorial = 20;
+
+VAR
+    factorial: INTEGER;
+    factorials: ARRAY maxFactorial OF INTEGER;
+
+PROCEDURE recFact(f: INTEGER): INTEGER;
+VAR res: INTEGER;
+BEGIN
+    IF f <= 1 THEN
+        res := 1;
+    ELSE
+        res := f * recFact(f - 1);
+    END;
+
+    factorials[f] := res;
+
+    RETURN res;
+END recFact;
+
+BEGIN
+    PRINT("Zadejte číslo faktoriálu (max ", maxFactorial, "): ");
+    factorial := READ_INT();
+    IF factorial > maxFactorial THEN
+        PRINTLN("Neplatné číslo ", factorial);
+        EXIT()
+    END;
+
+    recFact(factorial);
+    PRINTLN("Faktoriály: ");
+
+    FOR i := 1 TO factorial+1 DO
+        PRINTLN(i, ": ", factorials[i])
+    END;
+END e3.

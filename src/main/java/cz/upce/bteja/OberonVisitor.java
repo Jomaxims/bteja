@@ -167,12 +167,6 @@ public interface OberonVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitForStatement(OberonParser.ForStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link OberonParser#exitStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExitStatement(OberonParser.ExitStatementContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link OberonParser#returnStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

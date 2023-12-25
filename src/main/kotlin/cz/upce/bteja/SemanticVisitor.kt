@@ -29,7 +29,7 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
     private fun ParseTree.visit(): Value? = visit(this)
     private fun RuleNode.visitChildren(): Value? = visitChildren(this)
 
-    private fun enterNewContext() = contexts.push(ExecutionContext(programContext, currentContext))
+    private fun enterNewContext(isProcedure: Boolean = false) = contexts.push(ExecutionContext(programContext, currentContext, isProcedure))
     private fun exitCurrentContext() = contexts.pop()
 
     private fun addDefaultProcedures() {
@@ -121,7 +121,7 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
             return PrimitiveValue.getTypedEmpty(variable.value.asArray<Any>().ofType)
         }
         if (variable.value.type == DataType.MATRIX && ctx.expression().size == 2) {
-            return PrimitiveValue.getTypedEmpty(variable.value.asArray<Any>().ofType)
+            return PrimitiveValue.getTypedEmpty(variable.value.asMatrix<Any>().ofType)
         }
 
         return variable.value
@@ -151,6 +151,14 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
         }
 
         val expressionValue = ctx.expression().visit()
+        expressionValue?.let {
+            if (variable.value.type == DataType.ARRAY && variable.value.asArray<Any>().ofType == it.type) {
+                return null
+            }
+            if (variable.value.type == DataType.MATRIX && variable.value.asMatrix<Any>().ofType == it.type) {
+                return null
+            }
+        }
         if (!variable.value.areOfSameType(expressionValue)) {
             errors.add(OberonError("Neplatná hodnota pro proměnnou \"$varName\" typu ${variable.value.type}", ctx))
 
@@ -262,7 +270,7 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
                 return null
             }
 
-            return it.procedureHeading().procedureParameters().type().visit()
+            return it.procedureHeading().procedureParameters().type()?.visit()
         }
 
         errors.add(OberonError("Procedura \"$procedureName\" neexistuje", ctx))
@@ -275,7 +283,7 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
 
         programContext.procedures[procedureName] = ctx
 
-        enterNewContext()
+        enterNewContext(true)
 
         ctx.procedureHeading().procedureParameters().fPSection().forEach {
             val name = it.ident().text
@@ -287,7 +295,7 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
 
         exitCurrentContext()
 
-        val returnValue = ctx.procedureHeading().procedureParameters().type().visit()
+        val returnValue = ctx.procedureHeading().procedureParameters()?.type()?.visit()
 
         if ((returnValue == null && procedureValue != null) || (procedureValue == null && returnValue != null)) {
             errors.add(OberonError("Neplatná hodnota pro proceduru \"$procedureName\" s návratovým typem ${returnValue?.type}", ctx))
@@ -319,8 +327,41 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
     }
 
     override fun visitReturnStatement(ctx: OberonParser.ReturnStatementContext): Value? {
+        if (!currentContext.isProcedure) {
+            errors.add(OberonError("RETURN mimo proceduru", ctx))
+
+            return null
+        }
+
         val value = ctx.visitChildren()
 
         throw ProcedureReturnedException(value)
+    }
+
+    override fun visitForStatement(ctx: OberonParser.ForStatementContext): Value? {
+        enterNewContext()
+
+        val counterName = ctx.ident().text
+        val counterValue = ctx.counterExpression.visit() ?: PrimitiveValue.Empty
+        currentContext.variables[counterName] = Variable(counterValue, true)
+
+        val toValue = ctx.toExpression.visit()
+        val byValue = ctx.byExpression?.visit()
+
+        if (counterValue.type != DataType.INTEGER) {
+            errors.add(OberonError("FOR iteruje pouze po INTEGER", ctx))
+        }
+        if (toValue == null || toValue.type != DataType.INTEGER) {
+            errors.add(OberonError("FOR iteruje pouze po INTEGER", ctx))
+        }
+        if (byValue != null && byValue.type != DataType.INTEGER) {
+            errors.add(OberonError("FOR iteruje pouze po INTEGER", ctx))
+        }
+
+        ctx.visitChildren()
+
+        exitCurrentContext()
+
+        return null
     }
 }

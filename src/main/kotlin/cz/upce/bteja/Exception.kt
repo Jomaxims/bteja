@@ -29,3 +29,4 @@ class WrongNumberOfParametersException(message: String? = null, context: ParserR
     OberonException(message, context)
 
 class ProcedureReturnedException(val value: Value? = null, message: String? = null) : Exception(message)
+class ProgramExitException(message: String? = null) : OberonException(message)
