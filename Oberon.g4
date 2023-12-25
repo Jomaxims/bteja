@@ -79,7 +79,7 @@ matrixType
    ;
 
 length
-   : expression
+   : simpleExpression
    ;
 
 identList
@@ -91,7 +91,7 @@ variableDeclaration
    ;
 
 expression
-   : (simpleExpression (relation simpleExpression)?)
+   : simpleExpression
    | STRING
    ;
 
@@ -195,7 +195,7 @@ declarationSequence
    ;
 
 procedureParameters
-   : '(' (fPSection (';' fPSection)*)? ')' (':' ident)?
+   : '(' (fPSection (';' fPSection)*)? ')' (':' type)?
    ;
 
 fPSection

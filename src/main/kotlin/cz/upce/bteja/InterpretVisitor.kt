@@ -6,11 +6,11 @@ import org.antlr.v4.runtime.tree.RuleNode
 import java.util.*
 
 class InterpretVisitor : OberonBaseVisitor<Value>() {
-    val programContext = ProgramContext()
-    val contexts = Stack<ExecutionContext>()
+    private val programContext = ProgramContext()
+    private val contexts = Stack<ExecutionContext>()
     private val logger = KotlinLogging.logger { }
 
-    val currentContext get() = contexts.peek()!!
+    private val currentContext get() = contexts.peek()!!
 
     init {
         addDefaultProcedures()

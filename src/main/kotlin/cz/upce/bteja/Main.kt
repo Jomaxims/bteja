@@ -2,37 +2,23 @@ package cz.upce.bteja
 
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
+import java.io.File
 
 fun main(args: Array<String>) {
-//    val text = File("./example.txt").readText()
-    val text = prog
-    val lexer = OberonLexer(CharStreams.fromString(text))
-    val tokenStream = CommonTokenStream(lexer).apply { fill() }
-    val parser = OberonParser(tokenStream)
+    val text = File("./program.txt").readText()
+
+    val semanticAnalyzer = SemanticVisitor()
+    semanticAnalyzer.visit(getParser(text).module())
+    semanticAnalyzer.errors.forEach(::println)
+
+    if (!semanticAnalyzer.isValid)
+        return
 
     try {
-        InterpretVisitor().visit(parser.module())
+        InterpretVisitor().visit(getParser(text).module())
     } catch (e: OberonException) {
         println("Chyba na řádku ${e.context?.start?.line}: ${e.message}")
     }
 }
 
-val prog = """
-MODULE e3;
-
-CONST
-    factorial = 3;
-
-PROCEDURE recFact(f: INTEGER): INTEGER;
-BEGIN
-    IF f <= 1 THEN
-        RETURN 1;
-    ELSE
-        RETURN f * recFact(f - 1);
-    END;
-END recFact;
-
-BEGIN
-    PRINTLN("Factorial: ", recFact(factorial));
-END e3.
-""".trimIndent()
+fun getParser(text: String) = OberonParser(CommonTokenStream(OberonLexer(CharStreams.fromString(text))).apply { fill() })

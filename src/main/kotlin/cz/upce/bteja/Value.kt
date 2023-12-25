@@ -19,7 +19,34 @@ enum class DataType {
 
             return ANY
         }
+
+        val primitiveTypes = listOf(INTEGER, REAL, STRING)
     }
+}
+
+fun Array<Value>.areOfSameTypes(other: Array<Value?>): Boolean {
+    if (this.size != other.size)
+        return false
+
+    this.forEachIndexed { i, value ->
+        if (!value.areOfSameType(other[i]))
+            return false
+    }
+
+    return true
+}
+
+@JvmName("areOfSameTypesNullable")
+fun Array<Value?>.areOfSameTypes(other: Array<Value?>): Boolean {
+    if (this.size != other.size)
+        return false
+
+    this.forEachIndexed { i, value ->
+        if (value == null || !value.areOfSameType(other[i]))
+            return false
+    }
+
+    return true
 }
 
 sealed class Value(val type: DataType) {
@@ -28,6 +55,19 @@ sealed class Value(val type: DataType) {
     fun <T : Any> asMatrix() = this as MatrixValue<T>
 
     abstract fun valueToString(): String
+
+    fun areOfSameType(other: Value?): Boolean {
+        if (other == null)
+            return false
+        if (this.type != other.type)
+            return false
+
+        return when(this.type) {
+            DataType.ARRAY -> this.asArray<Any>().ofType == other.asArray<Any>().ofType || this.asArray<Any>().ofType == DataType.ANY
+            DataType.MATRIX -> this.asMatrix<Any>().ofType == other.asMatrix<Any>().ofType || this.asMatrix<Any>().ofType == DataType.ANY
+            else -> true
+        }
+    }
 }
 
 class PrimitiveValue<T : Any>(val value: T, type: DataType) : Value(type) {
