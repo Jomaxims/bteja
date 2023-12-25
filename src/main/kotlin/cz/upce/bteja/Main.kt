@@ -34,6 +34,5 @@ END recFact;
 
 BEGIN
     PRINTLN("Factorial: ", recFact(factorial));
-    recFact("factorial")
 END e3.
 """.trimIndent()

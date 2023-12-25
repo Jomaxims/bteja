@@ -1,9 +1,5 @@
 package cz.upce.bteja
 
-fun interface LibraryProcedure {
-    fun run(vararg vars: Value): Value?
-}
-
 class ProgramContext {
     val procedures = mutableMapOf<String, OberonParser.ProcedureDeclarationContext>()
     val libraryProcedures = mutableMapOf<String, LibraryProcedure>()
