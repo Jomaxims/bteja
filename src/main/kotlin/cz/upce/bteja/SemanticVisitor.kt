@@ -29,7 +29,10 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
     private fun ParseTree.visit(): Value? = visit(this)
     private fun RuleNode.visitChildren(): Value? = visitChildren(this)
 
-    private fun enterNewContext(isProcedure: Boolean = false) = contexts.push(ExecutionContext(programContext, currentContext, isProcedure))
+    private fun enterNewContext(isProcedure: Boolean = false) = contexts.push(ExecutionContext(
+        currentContext,
+        isProcedure
+    ))
     private fun exitCurrentContext() = contexts.pop()
 
     private fun addDefaultProcedures() {
@@ -37,7 +40,7 @@ class SemanticVisitor : OberonBaseVisitor<Value>() {
     }
 
     override fun visitModule(ctx: OberonParser.ModuleContext): Value? {
-        contexts.push(ExecutionContext(programContext, null))
+        contexts.push(ExecutionContext(null))
 
         ctx.visitChildren()
 
