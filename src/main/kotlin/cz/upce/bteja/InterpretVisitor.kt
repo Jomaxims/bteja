@@ -12,22 +12,16 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
 
     private val currentContext get() = contexts.peek()!!
 
-    init {
-        addDefaultProcedures()
-    }
-
     private fun ParseTree.visit() = visit(this)
     private fun RuleNode.visitChildren() = visitChildren(this)
 
-    private fun enterNewContext() = contexts.push(ExecutionContext(currentContext))
+    private fun enterNewContext(isProcedure: Boolean = false) = contexts.push(ExecutionContext(programContext, currentContext, isProcedure))
     private fun exitCurrentContext() = contexts.pop()
 
-    private fun addDefaultProcedures() {
-        programContext.libraryProcedures += LibraryProcedures.procedures
-    }
-
     override fun visitModule(ctx: OberonParser.ModuleContext): Value? {
-        contexts.push(ExecutionContext(null))
+        contexts.push(ExecutionContext(programContext, null))
+        programContext.libraryProcedures += LibraryProcedures.procedures
+        programContext.globalContext = currentContext
 
         ctx.visitChildren()
 
@@ -57,7 +51,7 @@ class InterpretVisitor : OberonBaseVisitor<Value>() {
         }
 
         val procedureContext = programContext.procedures[callName]!!
-        enterNewContext()
+        enterNewContext(true)
 
         callParameters.forEachIndexed { i, value ->
             val name = procedureContext.procedureHeading().procedureParameters().fPSection(i).ident().text
